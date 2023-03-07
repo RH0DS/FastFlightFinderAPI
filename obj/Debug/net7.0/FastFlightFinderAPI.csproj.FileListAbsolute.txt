@@ -1,6 +1,5 @@
 C:\Users\Robin\Programmering\SALT-PGP\FastFlightFinder\FastFlightFinderAPI\bin\Debug\net7.0\appsettings.Development.json
 C:\Users\Robin\Programmering\SALT-PGP\FastFlightFinder\FastFlightFinderAPI\bin\Debug\net7.0\appsettings.json
-C:\Users\Robin\Programmering\SALT-PGP\FastFlightFinder\FastFlightFinderAPI\bin\Debug\net7.0\Data\SeedData.Json
 C:\Users\Robin\Programmering\SALT-PGP\FastFlightFinder\FastFlightFinderAPI\bin\Debug\net7.0\FastFlightFinderAPI.exe
 C:\Users\Robin\Programmering\SALT-PGP\FastFlightFinder\FastFlightFinderAPI\bin\Debug\net7.0\FastFlightFinderAPI.deps.json
 C:\Users\Robin\Programmering\SALT-PGP\FastFlightFinder\FastFlightFinderAPI\bin\Debug\net7.0\FastFlightFinderAPI.runtimeconfig.json
@@ -75,3 +74,4 @@ C:\Users\Robin\Programmering\SALT-PGP\FastFlightFinder\FastFlightFinderAPI\obj\D
 C:\Users\Robin\Programmering\SALT-PGP\FastFlightFinder\FastFlightFinderAPI\obj\Debug\net7.0\FastFlightFinderAPI.pdb
 C:\Users\Robin\Programmering\SALT-PGP\FastFlightFinder\FastFlightFinderAPI\obj\Debug\net7.0\FastFlightFinderAPI.genruntimeconfig.cache
 C:\Users\Robin\Programmering\SALT-PGP\FastFlightFinder\FastFlightFinderAPI\obj\Debug\net7.0\ref\FastFlightFinderAPI.dll
+C:\Users\Robin\Programmering\SALT-PGP\FastFlightFinder\FastFlightFinderAPI\bin\Debug\net7.0\Repositories\SeedData.Json

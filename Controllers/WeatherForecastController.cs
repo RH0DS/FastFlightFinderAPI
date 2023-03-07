@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Mvc;
   using System.Collections.Generic;
   using System.Linq;
   using System.Threading.Tasks;
+  using System.IO;
+using System.Text.Json;
 
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -11,83 +13,101 @@ using Microsoft.AspNetCore.Http;
 namespace FastFlightFinderAPI.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
+    [Route("api/[controller]")]
     public class WeatherForecastController : ControllerBase
     {
-        private static readonly string[] Summaries = new[]
-        {
-        "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-    };
-    private readonly DataContext _context;
+        
 
-        private readonly ILogger<WeatherForecastController> _logger;
+    private readonly ILogger<WeatherForecastController> _logger;
+    private readonly IWeatherForecastRepo _context;
 
-        public WeatherForecastController(ILogger<WeatherForecastController> logger, DataContext context)
+    public WeatherForecastController(ILogger<WeatherForecastController> logger, IWeatherForecastRepo context)
+    {
+        _logger = logger;
+        _context = context;
+    }
+
+
+    [HttpGet ("Seedify")]
+    public async Task<ActionResult> Seedify()
+    {
+        if (_context.FlightRouteExists == null)
         {
-            _logger = logger;
-            _context = context;
+            return NotFound();
+        }
+        
+        var result = await _context.Seedify();
+        return Ok(result);
+    }
+
+      [HttpGet]
+    public async Task<ActionResult<IEnumerable<FlightRoute>>> GetFlightRoutes()
+    {
+        if (_context.FlightRouteExists == null)
+        {
+            return NotFound();
+        }
+    var  flightRoutes = await _context.GetAllFlightRoutes();
+        return Ok(flightRoutes);
+    }
+
+
+
+    [HttpGet("{id}")]
+    public async Task<ActionResult<FlightRoute>> GetFlightRoute(string id)
+    {
+        if (_context.FlightRouteExists == null)
+        {
+            return NotFound();
+        }
+        var FlightRoute = await _context.GetFlightRoute(id);
+
+        if (FlightRoute == null)
+        {
+            return NotFound();
         }
 
-        // [HttpGet(Name = "GetWeatherForecast")]
-        // public IEnumerable<WeatherForecast> Get()
-        // {
-        //     return Enumerable.Range(1, 5).Select(index => new WeatherForecast
-        //     {
-        //         Date = DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-        //         TemperatureC = Random.Shared.Next(-20, 55),
-        //         Summary = Summaries[Random.Shared.Next(Summaries.Length)]
-        //     })
-        //     .ToArray();
-        // }
+        return FlightRoute;
+    }
 
-         [HttpGet]
+
     
-        public async Task<ActionResult<IEnumerable<FlightRoute>>> GetProducts()
-        {
-            if (_context.FlightRoutes == null)
-            {
-                return NotFound();
-            }
-        var  flightRoutes = await _context.FlightRoutes.ToListAsync();
 
-
-            return Ok(flightRoutes);
-        }
-
-          [HttpPost]
-      [Authorize (Roles ="admin, super-admin")  ]
+    
+    [HttpPost("nogot")] 
     public async Task<ActionResult<FlightRoute>> PostFlightRoute(FlightRoute FlightRoute)
     {
-        if (_context.FlightRoutes == null)
-        {
-            return Problem("Entity set 'DataContext.FlightRoute'  is null.");
-        }
-        _context.FlightRoutes.Add(FlightRoute);
-        try
-        {
-            await _context.SaveChangesAsync();
-        }
-        catch (DbUpdateException)
-        {
-            if (FlightRouteExists(FlightRoute.RouteId))
-            {
-                return Conflict();
-            }
-            else
-            {
-                throw;
-            }
-        }
 
-        
-        return CreatedAtAction("GetProduct", new { id = FlightRoute.RouteId }, FlightRoute);
-    }
-
-
-        private bool FlightRouteExists(string id)
+    
+    if (_context.FlightRouteExists == null)
     {
-        return (_context.FlightRoutes?.Any(e => e.RouteId == id)).GetValueOrDefault();
+        return Problem("Entity set 'DataContext.FlightRoute'  is null.");
     }
+    await _context.CreateFlightRoute(FlightRoute);
+
+    return CreatedAtAction("GetFlightRoute", new { id = FlightRoute.RouteId }, FlightRoute);
+    }
+    [HttpDelete("{id}")]
+    
+    public async Task<IActionResult> DeleteProduct(string id)
+    {
+        if (_context.FlightRouteExists == null)
+        {
+            return NotFound();
+        }
+        var product = await _context.GetFlightRoute(id);
+        if (product == null)
+        {
+            return NotFound();
+        }
+
+        await  _context.DeleteFlightRoute(id);
+        
+
+        return NoContent();
+    }
+
+  
 
 
 

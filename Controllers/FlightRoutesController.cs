@@ -14,31 +14,19 @@ namespace FastFlightFinderAPI.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class WeatherForecastController : ControllerBase
+    public class FlightRoutesController : ControllerBase
     {
         
 
-    private readonly ILogger<WeatherForecastController> _logger;
-    private readonly IWeatherForecastRepo _context;
+    private readonly IFlightRouteRepository _context;
 
-    public WeatherForecastController(ILogger<WeatherForecastController> logger, IWeatherForecastRepo context)
+    public FlightRoutesController( IFlightRouteRepository context)
     {
-        _logger = logger;
+      
         _context = context;
-    }
-
-
-    [HttpGet ("Seedify")]
-    public async Task<ActionResult> Seedify()
-    {
-        if (_context.FlightRouteExists == null)
-        {
-            return NotFound();
-        }
         
-        var result = await _context.Seedify();
-        return Ok(result);
     }
+
 
       [HttpGet]
     public async Task<ActionResult<IEnumerable<FlightRoute>>> GetFlightRoutes()

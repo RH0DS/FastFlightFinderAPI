@@ -75,3 +75,5 @@ C:\Users\Robin\Programmering\SALT-PGP\FastFlightFinder\FastFlightFinderAPI\obj\D
 C:\Users\Robin\Programmering\SALT-PGP\FastFlightFinder\FastFlightFinderAPI\obj\Debug\net7.0\FastFlightFinderAPI.genruntimeconfig.cache
 C:\Users\Robin\Programmering\SALT-PGP\FastFlightFinder\FastFlightFinderAPI\obj\Debug\net7.0\ref\FastFlightFinderAPI.dll
 C:\Users\Robin\Programmering\SALT-PGP\FastFlightFinder\FastFlightFinderAPI\bin\Debug\net7.0\Data\SeedData.Json
+C:\Users\Robin\Programmering\SALT-PGP\FastFlightFinder\FastFlightFinderAPI\bin\Debug\net7.0\AutoMapper.dll
+C:\Users\Robin\Programmering\SALT-PGP\FastFlightFinder\FastFlightFinderAPI\bin\Debug\net7.0\AutoMapper.Extensions.Microsoft.DependencyInjection.dll

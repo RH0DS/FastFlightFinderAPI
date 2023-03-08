@@ -1,15 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
-  using System;
-  using System.Collections.Generic;
-  using System.Linq;
-  using System.Threading.Tasks;
-  using System.IO;
-using System.Text.Json;
 
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
-
-  using Microsoft.EntityFrameworkCore;
 namespace FastFlightFinderAPI.Controllers
 {
     [ApiController]
@@ -17,19 +7,18 @@ namespace FastFlightFinderAPI.Controllers
     public class FlightRoutesController : ControllerBase
     {
         
-
     private readonly IFlightRouteRepository _context;
 
     public FlightRoutesController( IFlightRouteRepository context)
     {
       
         _context = context;
-        
+
     }
 
 
       [HttpGet]
-    public async Task<ActionResult<IEnumerable<FlightRoute>>> GetFlightRoutes()
+    public async Task<ActionResult<IEnumerable<FlightRoute>>> GetFlightRoutesAsync()
     {
         if (_context.FlightRouteExists == null)
         {
@@ -42,7 +31,7 @@ namespace FastFlightFinderAPI.Controllers
 
 
     [HttpGet("{id}")]
-    public async Task<ActionResult<FlightRoute>> GetFlightRoute(string id)
+    public async Task<ActionResult<FlightRoute>> GetFlightRouteAsync(string id)
     {
         if (_context.FlightRouteExists == null)
         {
@@ -63,7 +52,7 @@ namespace FastFlightFinderAPI.Controllers
 
     
     [HttpPost("nogot")] 
-    public async Task<ActionResult<FlightRoute>> PostFlightRoute(FlightRoute FlightRoute)
+    public async Task<ActionResult<FlightRoute>> PostFlightRouteAsync(FlightRoute FlightRoute)
     {
 
     
@@ -77,7 +66,7 @@ namespace FastFlightFinderAPI.Controllers
     }
     [HttpDelete("{id}")]
     
-    public async Task<IActionResult> DeleteProduct(string id)
+    public async Task<IActionResult> DeleteProductAsync(string id)
     {
         if (_context.FlightRouteExists == null)
         {

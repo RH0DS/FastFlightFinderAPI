@@ -50,7 +50,7 @@ namespace FastFlightFinderAPI.Controllers
     }
 
     [HttpGet("ByDate")]
-    public async Task<ActionResult<IEnumerable<FlightOutgoingDTO>>> GetFlightByDateAsync(string departureDestination, string arrivalDestination, DateTime departureTime)
+    public async Task<ActionResult<FlightOutgoingDTO>> GetFlightByDateAsync(string departureDestination, string arrivalDestination, DateTime departureTime)
     {
         if (_context.FlightRouteExists == null)
         {
@@ -58,7 +58,7 @@ namespace FastFlightFinderAPI.Controllers
         }
         var flightRoutes = await _context.GetFlightByDate(departureDestination, arrivalDestination, departureTime);
 
-        var response = _mapper.Map<IEnumerable<FlightRouteOutgoingDTO>> (flightRoutes);
+        var response = _mapper.Map<FlightRouteOutgoingDTO> (flightRoutes);
 
 
         if (flightRoutes == null)
@@ -70,7 +70,7 @@ namespace FastFlightFinderAPI.Controllers
     }
 
    [HttpGet("ByDateWithLayover")]
-    public async Task<ActionResult<IEnumerable<Flight>>> GetFlightsWithLayoverAsync(string departureDestination, string arrivalDestination, DateTime departureTime)
+    public async Task<ActionResult<IEnumerable<TreavelPlan>>> GetFlightsWithLayoverAsync(string departureDestination, string arrivalDestination, DateTime departureTime)
     {
         if (_context.FlightRouteExists == null)
         {

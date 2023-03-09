@@ -30,19 +30,17 @@ public FlightRouteRepository( DataContext context )
     }
 
 
-    public async Task<IEnumerable<FlightRoute>> GetFlightByDate(string departureDestination, string arrivalDestination, DateTime departureTime)
-            //   public async Task<IEnumerable<FlightRoute>> GetFlightByRoute(string departureDestination, string arrivalDestination, DateTime departureTime, DateTime arrivalTime )
+    public async Task<FlightRoute> GetFlightByDate(string departureDestination, string arrivalDestination, DateTime departureTime)
+    
     {
-        // .Where(flight => flight.ArrivalAt <= arrivalTime && flight.DepartureAt >= departureTime).OrderBy(x =>x.DepartureAt))
 
         var flightRoutes = 
         await _context.FlightRoutes.Include(flightRoutes => flightRoutes.Itineraries
-        .Where(flight =>  flight.DepartureAt.Date == departureTime.Date).OrderBy(flight => flight.DepartureAt))
+        .Where(flight =>  flight.DepartureAt.Date >= departureTime.Date).OrderBy(flight => flight.DepartureAt))
         .ThenInclude(flight => flight.Prices)
         .Where(flightRoutes => flightRoutes.DepartureDestination.ToUpper().Contains( departureDestination.ToUpper()) 
-        && flightRoutes.ArrivalDestination.ToUpper().Contains( arrivalDestination.ToUpper())).ToListAsync();
+        && flightRoutes.ArrivalDestination.ToUpper().Contains( arrivalDestination.ToUpper())).FirstOrDefaultAsync();
         
-
         return flightRoutes;
 
     }
@@ -61,7 +59,7 @@ public FlightRouteRepository( DataContext context )
 
 
 
-    public async Task<IEnumerable<Flight>> GetFlightsWithLayoverAsync(string departureDestination, string arrivalDestination , DateTime departureTime)
+    public async Task<IEnumerable<TreavelPlan>> GetFlightsWithLayoverAsync(string departureDestination, string arrivalDestination , DateTime departureTime)
 {
     // Find all possible layover destinations based on departure and arrival cities
     var possibleLayoverDestinations = await _context.FlightRoutes
@@ -79,76 +77,157 @@ public FlightRouteRepository( DataContext context )
 
    var travelPlans = new List<TreavelPlan>();
     
-    var LISTAN = new List<FlightRoute>();
+    
+//    var theTwoRoutes = new List<FlightRoute>();
 
    
 
 foreach (var possibleLayover in possibleLayoverDestinations){
 
-        var flightRoutesDepatureDest = 
-        await _context.FlightRoutes.Include(flightRoutes => flightRoutes.Itineraries
-        .Where(flight => flight.DepartureAt.Date == departureTime.Date).OrderBy(flight =>flight.DepartureAt))
-        .ThenInclude(flight => flight.Prices)
-        .Where(flightRoutes => flightRoutes.DepartureDestination.ToUpper().Contains( departureDestination.ToUpper()) 
-        && flightRoutes.ArrivalDestination == possibleLayover).ToListAsync();
 
 
-        // var flightRoutesFinalDest = 
-        //         await _context.FlightRoutes.Include(flightRoutes => flightRoutes.Itineraries
-        //         .Where(flight => flight.DepartureAt >= departureTime).OrderBy(x =>x.DepartureAt))
+        var flightRouteDepatureDest = 
+            await _context.FlightRoutes.Include(flightRoutes => flightRoutes.Itineraries
+            .Where(flight => flight.DepartureAt.Date == departureTime.Date).OrderBy(flight =>flight.DepartureAt))
+            .ThenInclude(flight => flight.Prices)
+            .Where(flightRoutes => flightRoutes.DepartureDestination.ToUpper().Contains( departureDestination.ToUpper()) 
+            && flightRoutes.ArrivalDestination == possibleLayover).FirstOrDefaultAsync();
+        
 
-        //         .ThenInclude(flightPrice => flightPrice.Prices)
-        //         .Where(flightRoutes => flightRoutes.DepartureDestination == possibleLayover 
-        //         && flightRoutes.ArrivalDestination == arrivalDestination).ToListAsync();
+        var flightRouteFinalDest = 
+                await _context.FlightRoutes.Include(flightRoutes => flightRoutes.Itineraries
+                .Where(flight => flight.DepartureAt >= departureTime.AddHours(3)).OrderBy(x =>x.DepartureAt))
+
+                .ThenInclude(flightPrice => flightPrice.Prices)
+                .Where(flightRoutes => flightRoutes.DepartureDestination == possibleLayover 
+                && flightRoutes.ArrivalDestination == arrivalDestination).FirstOrDefaultAsync();
+
+    
+    foreach (var flightToLayover in flightRouteDepatureDest.Itineraries){
+
+
+        foreach (var flightFromLayover in flightRouteFinalDest.Itineraries){
+
+          var timeCompare =  DateTime.Compare(flightToLayover.ArrivalAt ,  flightFromLayover.DepartureAt);
+
+            if(timeCompare < 0)
+            {
+            
+                var layoverDuration = flightFromLayover.DepartureAt - flightToLayover.ArrivalAt;
+        
+        
+        
+                var flightToLay =  new FlightOutgoingDTO
+                {
+                    FlightId = flightToLayover.FlightId,
+                    DepartureAt = flightToLayover.DepartureAt,
+                    ArrivalAt = flightToLayover.ArrivalAt,
+                    AvailableSeats = flightToLayover.AvailableSeats,
+                    To = flightToLayover.FlightRoute.ArrivalDestination,
+                    From = flightToLayover.FlightRoute.DepartureDestination,
+                    Prices = new PriceOutgoingDTO
+                        {  
+                            Currency = flightToLayover.Prices.Currency, 
+                            Adult = flightToLayover.Prices.Adult,
+                            Child = flightToLayover.Prices.Child
+                        } 
+                    
+                    
+                    };
+                        var flightFromLay =  new FlightOutgoingDTO
+                    {
+                    FlightId = flightFromLayover.FlightId,
+                    DepartureAt = flightFromLayover.DepartureAt,
+                    ArrivalAt = flightFromLayover.ArrivalAt,
+                    AvailableSeats = flightFromLayover.AvailableSeats,
+                    To = flightFromLayover.FlightRoute.ArrivalDestination,
+                    From = flightFromLayover.FlightRoute.DepartureDestination,
+                    Prices = new PriceOutgoingDTO
+                        {  
+                            Currency = flightFromLayover.Prices.Currency, 
+                            Adult = flightFromLayover.Prices.Adult,
+                            Child = flightFromLayover.Prices.Child
+                        }
+
+                };
+                
+               
+                travelPlans.Add(new TreavelPlan
+                {   
+                    Id = Guid.NewGuid(),
+                    FligtsId = $"{flightToLayover.FlightId}_{flightFromLayover.FlightId}",
+                    FlightList = new List<FlightOutgoingDTO> { flightToLay, flightFromLay },
+                    From = flightToLayover.FlightRoute.DepartureDestination,
+                    To = flightFromLayover.FlightRoute.ArrivalDestination,
+                    TotalTravelTime = flightFromLayover.ArrivalAt - flightToLayover.DepartureAt,
+                    TotalPrice = new PriceOutgoingDTO
+                        {   Currency = flightToLayover.Prices.Currency,
+                            Adult = (flightToLayover.Prices.Adult +flightFromLayover.Prices.Adult), 
+                            Child = (flightToLayover.Prices.Child +flightFromLayover.Prices.Child)
+                        },
+                    AvailableSeats = Math.Min(flightToLayover.AvailableSeats, flightFromLayover.AvailableSeats),
+                    AllDestinations = new List<string>
+                        { 
+                            flightToLayover.FlightRoute.DepartureDestination,
+                            flightToLayover.FlightRoute.ArrivalDestination, 
+                            flightFromLayover.FlightRoute.ArrivalDestination 
+                        }
+                   
+                });
+            }
+
+        }
+
+    }
+
 
 
         
 }
 
 
-  
+    // var flightsWithLayover = new List<Flight>();
 
-    var flightsWithLayover = new List<Flight>();
-
-    foreach (var layoverDestination in possibleLayoverDestinations)
-    {
-        // Find all flights that connect the departure city to the layover destination
-        var flightsToLayover = await _context.Flights
-            .Include(f => f.FlightRoute)
-            .Where(f => f.FlightRoute.DepartureDestination == departureDestination
-                        && f.FlightRoute.ArrivalDestination == layoverDestination)
-            .ToListAsync();
-        // Find all flights that connect the layover destination to the arrival city
-        var flightsFromLayover = await _context.Flights
-            .Include(f => f.FlightRoute)
-            .Where(f => f.FlightRoute.DepartureDestination == layoverDestination
-                        && f.FlightRoute.ArrivalDestination == arrivalDestination)
-            .ToListAsync();
-        foreach (var flightToLayover in flightsToLayover)
-        {
-            foreach (var flightFromLayover in flightsFromLayover)
-            {
-                var layoverDuration = flightFromLayover.DepartureAt - flightToLayover.ArrivalAt;
-                flightsWithLayover.Add(new Flight
-                {
-                    FlightId = $"{flightToLayover.FlightId}_{flightFromLayover.FlightId}",
-                    DepartureAt = flightToLayover.DepartureAt,
-                    ArrivalAt = flightFromLayover.ArrivalAt,
-                    AvailableSeats = Math.Min(flightToLayover.AvailableSeats, flightFromLayover.AvailableSeats),
-                    Prices = flightToLayover.Prices, // assuming the prices are the same for both flights
-                    FlightRoute = new FlightRoute
-                    {
-                        DepartureDestination = flightToLayover.FlightRoute.DepartureDestination,
-                        ArrivalDestination = flightFromLayover.FlightRoute.ArrivalDestination,
-                        Itineraries = new List<Flight> { flightToLayover, flightFromLayover },
-                        // LayoverDestination = layoverDestination,
-                        // LayoverDuration = layoverDuration
-                    }
-                });
-            }
-        }
-    }
-    return flightsWithLayover.Take(1);
+    // foreach (var layoverDestination in possibleLayoverDestinations)
+    // {
+    //     // Find all flights that connect the departure city to the layover destination
+    //     var flightsToLayover = await _context.Flights
+    //         .Include(f => f.FlightRoute)
+    //         .Where(f => f.FlightRoute.DepartureDestination == departureDestination
+    //                     && f.FlightRoute.ArrivalDestination == layoverDestination)
+    //         .ToListAsync();
+    //     // Find all flights that connect the layover destination to the arrival city
+    //     var flightsFromLayover = await _context.Flights
+    //         .Include(f => f.FlightRoute)
+    //         .Where(f => f.FlightRoute.DepartureDestination == layoverDestination
+    //                     && f.FlightRoute.ArrivalDestination == arrivalDestination)
+    //         .ToListAsync();
+    //     foreach (var flightToLayover in flightsToLayover)
+    //     {
+    //         foreach (var flightFromLayover in flightsFromLayover)
+    //         {
+    //             var layoverDuration = flightFromLayover.DepartureAt - flightToLayover.ArrivalAt;
+    //             flightsWithLayover.Add(new Flight
+    //             {
+    //                 FlightId = $"{flightToLayover.FlightId}_{flightFromLayover.FlightId}",
+    //                 DepartureAt = flightToLayover.DepartureAt,
+    //                 ArrivalAt = flightFromLayover.ArrivalAt,
+    //                 AvailableSeats = Math.Min(flightToLayover.AvailableSeats, flightFromLayover.AvailableSeats),
+    //                 Prices = flightToLayover.Prices, // assuming the prices are the same for both flights
+    //                 FlightRoute = new FlightRoute
+    //                 {
+    //                     DepartureDestination = flightToLayover.FlightRoute.DepartureDestination,
+    //                     ArrivalDestination = flightFromLayover.FlightRoute.ArrivalDestination,
+    //                     Itineraries = new List<Flight> { flightToLayover, flightFromLayover },
+    //                     // LayoverDestination = layoverDestination,
+    //                     // LayoverDuration = layoverDuration
+    //                 }
+    //             });
+    //         }
+    //     }
+    // }
+    // return flightsWithLayover.Take(1);
+    return travelPlans;
 }
 
 

@@ -2,8 +2,9 @@ public interface IFlightRouteRepository{
 
 
      Task <IEnumerable<FlightRoute>> GetAllFlightRoutes();
-     Task <FlightRoute> GetFlightRoute(string id);
-     // Task <FlightRoute> GetFlightByRoute(string departureDestination,string arrivalDestination );
+     Task<IEnumerable<FlightRoute>> GetFlightRouteByDepartureDestination(string departureDestination);
+     
+     Task <IEnumerable<FlightRoute>> GetFlightByDate(string departureDestination, string arrivalDestination, DateTime departureTime);
      
      Task<bool> CreateFlightRoute(FlightRoute createFlightRoute);
 
@@ -13,6 +14,10 @@ public interface IFlightRouteRepository{
 
      Task<bool> FlightRoutesFound();
      Task<bool> FlightRouteExists(string id);
+
+
+
+     Task<IEnumerable<Flight>> GetFlightsWithLayoverAsync(string departureDestination, string arrivalDestination, DateTime departureTime);
 
 
 }

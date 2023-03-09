@@ -21,26 +21,6 @@ public class  FlightRepository : IFlightRepository{
 
         }
 
-           public async Task<IEnumerable<FlightRoute>> GetFlightByRoute(string departureDestination, string arrivalDestination, DateTime departureTime)
-            //   public async Task<IEnumerable<FlightRoute>> GetFlightByRoute(string departureDestination, string arrivalDestination, DateTime departureTime, DateTime arrivalTime )
-        {
-        // .Where(flight => flight.ArrivalAt <= arrivalTime && flight.DepartureAt >= departureTime).OrderBy(x =>x.DepartureAt))
-
-        var flightRoutes = 
-        await _context.FlightRoutes.Include(flightRoutes => flightRoutes.Itineraries
-        .Where(flight => flight.DepartureAt >= departureTime).OrderBy(x =>x.DepartureAt))
-   
-        .ThenInclude(flightPrice => flightPrice.Prices)
-        .Where(flightRoutes => flightRoutes.DepartureDestination.ToUpper().Contains( departureDestination.ToUpper()) 
-        && flightRoutes.ArrivalDestination.ToUpper().Contains( arrivalDestination.ToUpper())).ToListAsync();
-        
-
-        return flightRoutes;
-
-        }
-
-
-        
 
         public async Task<bool> CreateFlight(Flight createFlight)
         {

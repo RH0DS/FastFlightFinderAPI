@@ -49,35 +49,16 @@ namespace FastFlightFinderAPI.Controllers
 
         return Flight;
     }
-        [HttpGet("/ByRoute")]
-    public async Task<ActionResult<IEnumerable<FlightOutgoingDTO>>> GetFlightByRouteAsync(string departureDestination, string arrivalDestination, DateTime departureTime)
-    {
-        if (_context.FlightExists == null)
-        {
-            return NotFound();
-        }
-        var flightRoutes = await _context.GetFlightByRoute(departureDestination, arrivalDestination, departureTime);
-
-        var response = _mapper.Map<IEnumerable<FlightRouteOutgoingDTO>> (flightRoutes);
-
-        if (flightRoutes == null)
-        {
-            return NotFound();
-        }
-
-        return Ok(response);
-    }
 
 
 
     
 
     
-    [HttpPost("nogot")] 
+    [HttpPost] 
     public async Task<ActionResult<Flight>> PostFlightAsync(Flight Flight)
     {
 
-    
     if (_context.FlightExists == null)
     {
         return Problem("Entity set 'DataContext.Flight'  is null.");
@@ -86,6 +67,8 @@ namespace FastFlightFinderAPI.Controllers
 
     return CreatedAtAction("GetFlight", new { id = Flight.FlightId }, Flight);
     }
+
+
     [HttpDelete("{id}")]
     
     public async Task<IActionResult> DeleteProductAsync(string id)

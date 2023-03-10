@@ -227,7 +227,9 @@ foreach (var possibleLayover in possibleLayoverDestinations){
     //     }
     // }
     // return flightsWithLayover.Take(1);
-    return travelPlans;
+
+    var t = travelPlans.OrderBy(x => x.TotalTravelTime).Take( 10);
+    return travelPlans.OrderBy(x => x.TotalTravelTime).Take(5);
 }
 
 

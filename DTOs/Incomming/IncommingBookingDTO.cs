@@ -13,7 +13,7 @@ public class IncommingBookingDTO{
 
     [StringLength(50, MinimumLength = 1, ErrorMessage =("Please provide an email of type string, max 50chars") )]
     public string Email { get; set; }
-    [Required (ErrorMessage = ("You must provide a list of flightIds. each flightId musr be of type string"))]
+    [Required (ErrorMessage = ("You must provide a list of flightIds. each flightId must be of type string"))]
     
     [FlightIdValidationAttribute ( ErrorMessage = "All flightIds must be of type string and of the right length")]
     public List<string> FlightNumbers { get; set; }

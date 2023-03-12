@@ -8,29 +8,29 @@ using Microsoft.EntityFrameworkCore;
 public class BookingsController : ControllerBase{
 
     
-    private readonly DataContext _context;
+    private readonly IBookingRepository _context;
     private readonly IMapper _mapper;
 
-    public BookingsController( DataContext context, IMapper mapper)
+    public BookingsController( IBookingRepository context, IMapper mapper)
     {
         _context = context;
         _mapper = mapper;
     }
 
 
-    [HttpPost("Booking")] 
-    public async Task<ActionResult> CreateAsync( IncommingBookingDTO bookingDTO )
+    [HttpPost("Create")] 
+    public async Task<ActionResult> CreateAsync( IncommingBookingDTO incommingBooking )
     {
     
-        foreach(var flightNumber in bookingDTO.FlightNumbers){
-        var seatsAvailable =await _context.Flights.Where(x => x.FlightId == flightNumber).Select(z =>z.AvailableSeats).FirstOrDefaultAsync();
-        if(seatsAvailable <bookingDTO.Seats && bookingDTO.Seats >= 1){
-            return NotFound("No available seats where found");
-        }
-        }
         
+        foreach (var flightId in incommingBooking.FlightNumbers)
+        {
+            if(! await _context.SeatsAvailableAsync(flightId, incommingBooking.Seats)){
+                return NotFound("Not enough available seats where found");
+            }
+        }
 
-    return Ok("I guess we booked stuff");
+    return await _context.CreateBooking(incommingBooking) ? Ok("Your bookinig has been created") : BadRequest("Something went wrong");
     }
 
 

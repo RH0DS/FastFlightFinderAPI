@@ -11,6 +11,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddScoped<IFlightRouteRepository,FlightRouteRepository >();
 builder.Services.AddScoped<IFlightRepository, FlightRepository >();
+builder.Services.AddScoped<IBookingRepository, BookingRepository >();
 
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 

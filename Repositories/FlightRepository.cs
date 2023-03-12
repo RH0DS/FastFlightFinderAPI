@@ -30,9 +30,9 @@ public class  FlightRepository : IFlightRepository{
         public async Task<bool> DeleteFlight(string Id)
         {
         if (await FlightExists(Id)){
-            var store = await _context.Flights.FindAsync(Id);
+            var flight = await _context.Flights.FindAsync(Id);
         
-            _context.Flights.Remove(store);
+            _context.Flights.Remove(flight);
             await _context.SaveChangesAsync();
             return true;
         }

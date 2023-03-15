@@ -1,4 +1,4 @@
-public class TreavelPlan{
+public class TravelPlan{
 
 public Guid Id { get; set; }
 

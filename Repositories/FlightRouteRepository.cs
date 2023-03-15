@@ -23,16 +23,21 @@ public FlightRouteRepository( DataContext context )
         await _context.FlightRoutes.Include(flightRoutes => flightRoutes.Itineraries
         .OrderBy(flight =>flight.DepartureAt))
         .ThenInclude(flight => flight.Prices)
+       
         .Where(flightRoutes => flightRoutes.DepartureDestination.ToUpper().Contains( departureDestination.ToUpper())).ToListAsync();
+
+
+            
         
 
         return flightRoutes;
     }
 
 
-    public async Task<FlightRoute> GetFlightByDate(string departureDestination, string arrivalDestination, DateTime departureTime)
+    public async Task<IEnumerable<TravelPlan>> GetFlightsByDate(string departureDestination, string arrivalDestination, DateTime departureTime)
     
     {
+        var travelPlans = new List<TravelPlan>(); 
 
         var flightRoutes = 
         await _context.FlightRoutes.Include(flightRoutes => flightRoutes.Itineraries
@@ -40,8 +45,53 @@ public FlightRouteRepository( DataContext context )
         .ThenInclude(flight => flight.Prices)
         .Where(flightRoutes => flightRoutes.DepartureDestination.ToUpper().Contains( departureDestination.ToUpper()) 
         && flightRoutes.ArrivalDestination.ToUpper().Contains( arrivalDestination.ToUpper())).FirstOrDefaultAsync();
+
+        foreach (var flight in  flightRoutes.Itineraries)
+        {
+                    var flightDTO =  new FlightOutgoingDTO
+                {
+                    FlightId = flight.FlightId,
+                    DepartureAt = flight.DepartureAt,
+                    ArrivalAt = flight.ArrivalAt,
+                    AvailableSeats = flight.AvailableSeats,
+                    To = flight.FlightRoute.ArrivalDestination,
+                    From = flight.FlightRoute.DepartureDestination,
+                    Prices = new PriceOutgoingDTO
+                        {  
+                            Currency = flight.Prices.Currency, 
+                            Adult = flight.Prices.Adult,
+                            Child = flight.Prices.Child
+                        } 
+                    };
+
+                travelPlans.Add(new TravelPlan
+                {   
+                    Id = Guid.NewGuid(),
+                    FligtsId = $"{flight.FlightId}",
+                    FlightList = new List<FlightOutgoingDTO> { flightDTO },
+                    From = flight.FlightRoute.DepartureDestination,
+                    To = flight.FlightRoute.ArrivalDestination,
+                    TotalTravelTime = flight.ArrivalAt - flight.DepartureAt,
+                    TotalPrice = new PriceOutgoingDTO
+                        {   Currency = flight.Prices.Currency,
+                            Adult = (flight.Prices.Adult), 
+                            Child = (flight.Prices.Child )
+                        },
+                    AvailableSeats = flight.AvailableSeats,
+                    AllDestinations = new List<string>
+                        { 
+                            flight.FlightRoute.DepartureDestination,
+                            flight.FlightRoute.ArrivalDestination, 
+                           
+                        }
+                   
+                });
+
+            
+        }
+
         
-        return flightRoutes;
+        return travelPlans;
 
     }
 
@@ -59,7 +109,7 @@ public FlightRouteRepository( DataContext context )
 
 
 
-    public async Task<IEnumerable<TreavelPlan>> GetFlightsWithLayoverAsync(string departureDestination, string arrivalDestination , DateTime departureTime)
+    public async Task<IEnumerable<TravelPlan>> GetFlightsWithLayoverAsync(string departureDestination, string arrivalDestination , DateTime departureTime)
 {
     // Find all possible layover destinations based on departure and arrival cities
     var possibleLayoverDestinations = await _context.FlightRoutes
@@ -75,7 +125,7 @@ public FlightRouteRepository( DataContext context )
         .ToListAsync();  //ger en lista med strings med möjliga destinationer som sammanlänkar 2 destinarioner
 
 
-   var travelPlans = new List<TreavelPlan>();
+   var travelPlans = new List<TravelPlan>();
     
     
 //    var theTwoRoutes = new List<FlightRoute>();
@@ -152,7 +202,7 @@ foreach (var possibleLayover in possibleLayoverDestinations){
                 };
                 
                
-                travelPlans.Add(new TreavelPlan
+                travelPlans.Add(new TravelPlan
                 {   
                     Id = Guid.NewGuid(),
                     FligtsId = $"{flightToLayover.FlightId}_{flightFromLayover.FlightId}",
